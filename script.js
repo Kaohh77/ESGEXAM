@@ -1,1 +1,73 @@
-<html><head><meta content="text/html; charset=UTF-8" http-equiv="content-type"><style type="text/css">ol{margin:0;padding:0}table td,table th{padding:0}.c0{color:#000000;font-weight:400;text-decoration:none;vertical-align:baseline;font-size:11pt;font-family:"Arial";font-style:normal}.c1{padding-top:0pt;padding-bottom:0pt;line-height:1.15;orphans:2;widows:2;text-align:left}.c3{background-color:#ffffff;max-width:451.4pt;padding:72pt 72pt 72pt 72pt}.c2{height:11pt}.title{padding-top:0pt;color:#000000;font-size:26pt;padding-bottom:3pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}.subtitle{padding-top:0pt;color:#666666;font-size:15pt;padding-bottom:16pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}li{color:#000000;font-size:11pt;font-family:"Arial"}p{margin:0;color:#000000;font-size:11pt;font-family:"Arial"}h1{padding-top:20pt;color:#000000;font-size:20pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h2{padding-top:18pt;color:#000000;font-size:16pt;padding-bottom:6pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h3{padding-top:16pt;color:#434343;font-size:14pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h4{padding-top:14pt;color:#666666;font-size:12pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h5{padding-top:12pt;color:#666666;font-size:11pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;orphans:2;widows:2;text-align:left}h6{padding-top:12pt;color:#666666;font-size:11pt;padding-bottom:4pt;font-family:"Arial";line-height:1.15;page-break-after:avoid;font-style:italic;orphans:2;widows:2;text-align:left}</style></head><body class="c3 doc-content"><p class="c1"><span class="c0">// &#21152;&#36617; CSV &#25991;&#20214;&#20006;&#35299;&#26512;</span></p><p class="c1"><span class="c0">async function loadQuestions() {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const response = await fetch(&#39;questions.csv&#39;);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const text = await response.text();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const rows = text.split(&#39;\n&#39;).slice(1); // &#31227;&#38500;&#27161;&#38957;&#34892;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; return rows.map(row =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const [&#38988;&#34399;, &#38988;&#30446;, &#36984;&#38917;A, &#36984;&#38917;B, &#36984;&#38917;C, &#36984;&#38917;D, Answer] = row.split(&#39;,&#39;);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; return { &#38988;&#34399;, &#38988;&#30446;, &#36984;&#38917;A, &#36984;&#38917;B, &#36984;&#38917;C, &#36984;&#38917;D, Answer: parseInt(Answer) };</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; });</span></p><p class="c1"><span class="c0">}</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">// &#38568;&#27231;&#36984;&#21462; 10 &#38988;</span></p><p class="c1"><span class="c0">function getRandomQuestions(questions, count) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const shuffled = questions.sort(() =&gt; 0.5 - Math.random());</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; return shuffled.slice(0, count);</span></p><p class="c1"><span class="c0">}</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">// &#39023;&#31034;&#30070;&#21069;&#38988;&#30446;</span></p><p class="c1"><span class="c0">function displayQuestion(question, index, total) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;question-number&#39;).textContent = `&#38988;&#34399; ${question.&#38988;&#34399;} (${index + 1}/${total})`;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;question-text&#39;).textContent = question.&#38988;&#30446;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;option1&#39;).textContent = question.&#36984;&#38917;A;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;option2&#39;).textContent = question.&#36984;&#38917;B;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;option3&#39;).textContent = question.&#36984;&#38917;C;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;option4&#39;).textContent = question.&#36984;&#38917;D;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;user-answer&#39;).value = &#39;&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;result&#39;).className = &#39;&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; document.getElementById(&#39;result&#39;).textContent = &#39;&#39;;</span></p><p class="c1"><span class="c0">}</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">// &#20027;&#37007;&#36655;</span></p><p class="c1"><span class="c0">document.addEventListener(&#39;DOMContentLoaded&#39;, async () =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const questions = await loadQuestions();</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const selectedQuestions = getRandomQuestions(questions, 10);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; let currentIndex = 0;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // &#39023;&#31034;&#31532;&#19968;&#38988;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; displayQuestion(selectedQuestions[currentIndex], currentIndex, 10);</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // &#31572;&#26696;&#36664;&#20837;&#30435;&#32893;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; const answerInput = document.getElementById(&#39;user-answer&#39;);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; answerInput.addEventListener(&#39;input&#39;, () =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const userAnswer = parseInt(answerInput.value);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; const correctAnswer = selectedQuestions[currentIndex].Answer;</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; if (userAnswer &gt;= 1 &amp;&amp; userAnswer &lt;= 4) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if (userAnswer === correctAnswer) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; document.getElementById(&#39;result&#39;).className = &#39;correct&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; setTimeout(() =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; currentIndex++;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if (currentIndex &lt; 10) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; displayQuestion(selectedQuestions[currentIndex], currentIndex, 10);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; } else {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; document.getElementById(&#39;question-container&#39;).style.display = &#39;none&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; document.getElementById(&#39;end-screen&#39;).style.display = &#39;block&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; setTimeout(() =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; window.location.href = &#39;index.html&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }, 3000);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }, 1000);</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; } else {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; document.getElementById(&#39;result&#39;).className = &#39;incorrect&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; });</span></p><p class="c1 c2"><span class="c0"></span></p><p class="c1"><span class="c0">&nbsp; &nbsp; // &#20013;&#36884;&#38626;&#38283;&#36820;&#22238;&#39318;&#38913;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; window.onbeforeunload = () =&gt; {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; if (currentIndex &lt; 10) {</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; window.location.href = &#39;index.html&#39;;</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; &nbsp; &nbsp; }</span></p><p class="c1"><span class="c0">&nbsp; &nbsp; };</span></p><p class="c1"><span class="c0">});</span></p><p class="c1 c2"><span class="c0"></span></p></body></html>
+// 加載 CSV 文件並解析
+async function loadQuestions() {
+    const response = await fetch('questions.csv');
+    const text = await response.text();
+    const rows = text.split('\n').slice(1); // 移除標頭行
+    return rows.map(row => {
+        const [題號, 題目, 選項A, 選項B, 選項C, 選項D, Answer] = row.split(',');
+        return { 題號, 題目, 選項A, 選項B, 選項C, 選項D, Answer: parseInt(Answer) };
+    });
+}
+
+// 隨機選取 10 題
+function getRandomQuestions(questions, count) {
+    const shuffled = questions.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
+
+// 顯示當前題目
+function displayQuestion(question, index, total) {
+    document.getElementById('question-number').textContent = `題號 ${question.題號} (${index + 1}/${total})`;
+    document.getElementById('question-text').textContent = question.題目;
+    document.getElementById('option1').textContent = question.選項A;
+    document.getElementById('option2').textContent = question.選項B;
+    document.getElementById('option3').textContent = question.選項C;
+    document.getElementById('option4').textContent = question.選項D;
+    document.getElementById('user-answer').value = '';
+    document.getElementById('result').className = '';
+    document.getElementById('result').textContent = '';
+}
+
+// 主邏輯
+document.addEventListener('DOMContentLoaded', async () => {
+    const questions = await loadQuestions();
+    const selectedQuestions = getRandomQuestions(questions, 10);
+    let currentIndex = 0;
+
+    // 顯示第一題
+    displayQuestion(selectedQuestions[currentIndex], currentIndex, 10);
+
+    // 答案輸入監聽
+    const answerInput = document.getElementById('user-answer');
+    answerInput.addEventListener('input', () => {
+        const userAnswer = parseInt(answerInput.value);
+        const correctAnswer = selectedQuestions[currentIndex].Answer;
+
+        if (userAnswer >= 1 && userAnswer <= 4) {
+            if (userAnswer === correctAnswer) {
+                document.getElementById('result').className = 'correct';
+                setTimeout(() => {
+                    currentIndex++;
+                    if (currentIndex < 10) {
+                        displayQuestion(selectedQuestions[currentIndex], currentIndex, 10);
+                    } else {
+                        document.getElementById('question-container').style.display = 'none';
+                        document.getElementById('end-screen').style.display = 'block';
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 3000);
+                    }
+                }, 1000);
+            } else {
+                document.getElementById('result').className = 'incorrect';
+            }
+        }
+    });
+
+    // 中途離開返回首頁
+    window.onbeforeunload = () => {
+        if (currentIndex < 10) {
+            window.location.href = 'index.html';
+        }
+    };
+});
