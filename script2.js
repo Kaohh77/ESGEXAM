@@ -1,6 +1,6 @@
 // 初始化EmailJS
 (function() {
-    emailjs.init("YOUR_USER_ID"); // 替換為你的User ID
+    emailjs.init(cvRG573vnYfYNJrDN); // 替換為你的User ID
 })();
 
 // 模擬CSV資料庫（使用localStorage）
@@ -52,7 +52,7 @@ document.getElementById('registerForm')?.addEventListener('submit', function(e) 
         verify_link: verifyLink
     };
 
-    emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', templateParams)
+    emailjs.send('4tpu2l2', 't7rani9', templateParams)
         .then(() => {
             users.push(user);
             localStorage.setItem('users', JSON.stringify(users));
