@@ -56,7 +56,7 @@ button:hover {
 }
 
 .correct::before {
-    content: "OK";
+    content: "O";
     color: blue;
 }
 
