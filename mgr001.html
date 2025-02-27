@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 10px;
+            margin-right: 10px;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        .btn-success {
+            background-color: #2ecc71;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        .error {
+            color: red;
+            margin-top: 15px;
+        }
+        .success {
+            color: green;
+            margin-top: 15px;
+        }
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .header-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+        }
+        .search-box input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        .links {
+            margin-top: 20px;
+            text-align: center;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Member Management</h1>
+        
+        <div id="login-section" class="login-container">
+            <h2>Admin Login</h2>
+            <div class="form-group">
+                <label for="admin-id">Admin ID</label>
+                <input type="text" id="admin-id" placeholder="Enter admin ID">
+            </div>
+            
+            <div class="form-group">
+                <label for="admin-password">Password</label>
+                <input type="password" id="admin-password" placeholder="Enter password">
+            </div>
+            
+            <button class="btn" onclick="adminLogin()">Login</button>
+            <div id="login-message"></div>
+            
+            <div class="links">
+                <p><a href="index.html">Back to Member Login</a></p>
+            </div>
+        </div>
+        
+        <div id="management-section" style="display:none;">
+            <div class="header-actions">
+                <h2>Registered Members</h2>
+                <div class="search-box">
+                    <input type="text" id="search-input" placeholder="Search by email..." oninput="filterMembers()">
+                    <button class="btn btn-success" onclick="exportCSV()">Export to CSV</button>
+                    <button class="btn btn-danger" onclick="logout()">Logout</button>
+                </div>
+            </div>
+            
+            <div id="member-list">
+                <table id="members-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Registration Time</th>
+                            <th>Remarks</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="members-body">
+                        <!-- Members will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Admin credentials
+        const ADMIN_ID = "admin";
+        const ADMIN_PASSWORD = "12345678";
+        
+        // Load user data from localStorage
+        function getUserData() {
+            const userData = localStorage.getItem('userDatabase');
+            return userData ? JSON.parse(userData) : [];
+        }
+        
+        // Save user data to localStorage
+        function saveUserData(users) {
+            localStorage.setItem('userDatabase', JSON.stringify(users));
+        }
+        
+        // Admin login function
+        function adminLogin() {
+            const adminId = document.getElementById('admin-id').value;
+            const adminPassword = document.getElementById('admin-password').value;
+            const messageElement = document.getElementById('login-message');
+            
+            if (adminId === ADMIN_ID && adminPassword === ADMIN_PASSWORD) {
+                // Hide login section, show management section
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('management-section').style.display = 'block';
+                
+                // Load member data
+                loadMembers();
+            } else {
+                messageElement.innerHTML = '<p class="error">Invalid admin credentials</p>';
+            }
+        }
+        
+        // Logout function
+        function logout() {
+            document.getElementById('login-section').style.display = 'block';
+            document.getElementById('management-section').style.display = 'none';
+            document.getElementById('admin-id').value = '';
+            document.getElementById('admin-password').value = '';
+            document.getElementById('login-message').innerHTML = '';
+        }
+        
+        // Load members into the table
+        function loadMembers() {
+            const users = getUserData();
+            const tableBody = document.getElementById('members-body');
+            tableBody.innerHTML = '';
+            
+            if (users.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No members registered yet</td></tr>';
+                return;
+            }
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Format the registration time
+                const regDate = new Date(user.registrationTime);
+                const formattedDate = `${regDate.toLocaleDateString()} ${regDate.toLocaleTimeString()}`;
+                
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.email}</td>
+                    <td>${formattedDate}</td>
+                    <td>${user.remarks || ''}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteMember(${user.id})">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Filter members based on search input
+        function filterMembers() {
+            const searchText = document.getElementById('search-input').value.toLowerCase();
+            const users = getUserData();
+            const tableBody = document.getElementById('members-body');
+            tableBody.innerHTML = '';
+            
+            const filteredUsers = users.filter(user => 
+                user.email.toLowerCase().includes(searchText)
+            );
+            
+            if (filteredUsers.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No matching members found</td></tr>';
+                return;
+            }
+            
+            filteredUsers.forEach(user => {
+                const row = document.createElement('tr');
+                
+                // Format the registration time
+                const regDate = new Date(user.registrationTime);
+                const formattedDate = `${regDate.toLocaleDateString()} ${regDate.toLocaleTimeString()}`;
+                
+                row.innerHTML = `
+                    <td>${user.id}</td>
+                    <td>${user.email}</td>
+                    <td>${formattedDate}</td>
+                    <td>${user.remarks || ''}</td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteMember(${user.id})">Delete</button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        // Delete a member
+        function deleteMember(id) {
+            if (confirm('Are you sure you want to delete this member?')) {
+                let users = getUserData();
+                users = users.filter(user => user.id !== id);
+                saveUserData(users);
+                loadMembers();
+            }
+        }
+        
+        // Export members data to CSV
+        function exportCSV() {
+            const users = getUserData();
+            
+            if (users.length === 0) {
+                alert('No members to export');
+                return;
+            }
+            
+            // Create CSV content
+            const header = "id,email,password,registrationTime,remarks";
+            const rows = users.map(user => {
+                return `${user.id},${user.email},${user.password},${user.registrationTime},${user.remarks || ''}`;
+            });
+            
+            const csvContent = [header, ...rows].join('\n');
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'member_data.csv');
+            a.click();
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>
