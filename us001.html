@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Service</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .user-info {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-danger {
+            background-color: #e74c3c;
+        }
+        .btn:hover {
+            opacity: 0.9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .export-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Member Service Portal</h1>
+            <button class="btn btn-danger" onclick="logout()">Logout</button>
+        </div>
+        
+        <div id="user-info" class="user-info">
+            <!-- User info will be displayed here -->
+            Loading user information...
+        </div>
+        
+        <h2>All Registered Members</h2>
+        <div id="members-table">
+            <!-- Members table will be displayed here -->
+            Loading members...
+        </div>
+        
+        <div class="export-section">
+            <h2>Export Data</h2>
+            <p>Download all member data as a CSV file:</p>
+            <button class="btn" onclick="downloadCSV()">Download CSV</button>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in
+        function checkLogin() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                // Redirect to login if not logged in
+                window.location.href = 'index.html';
+                return null;
+            }
+            return JSON.parse(currentUser);
+        }
+        
+        // Load user data from localStorage (simulating CSV data)
+        function getUserData() {
+            const userData = localStorage.getItem('userDatabase');
+            return userData ? JSON.parse(userData) : [];
+        }
+        
+        // Display user info
+        function displayUserInfo(user) {
+            const userInfoElement = document.getElementById('user-info');
+            
+            if (!user) {
+                userInfoElement.innerHTML = '<p>No user information available</p>';
+                return;
+            }
+            
+            // Format the registration date
+            const regDate = new Date(user.registrationTime);
+            const formattedDate = regDate.toLocaleDateString() + ' ' + regDate.toLocaleTimeString();
+            
+            userInfoElement.innerHTML = `
+                <h3>Welcome, ${user.email}</h3>
+                <p><strong>User ID:</strong> ${user.id}</p>
+                <p><strong>Registration Date:</strong> ${formattedDate}</p>
+                ${user.remarks ? `<p><strong>Remarks:</strong> ${user.remarks}</p>` : ''}
+            `;
+        }
+        
+        // Display all members
+        function displayMembers() {
+            const users = getUserData();
+            const membersTableElement = document.getElementById('members-table');
+            
+            if (users.length === 0) {
+                membersTableElement.innerHTML = '<p>No members registered yet.</p>';
+                return;
+            }
+            
+            // Create a table to display members
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Registration Date</th>
+                            <th>Remarks</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            users.forEach(user => {
+                const regDate = new Date(user.registrationTime);
+                const formattedDate = regDate.toLocaleDateString();
+                
+                tableHTML += `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.email}</td>
+                        <td>${formattedDate}</td>
+                        <td>${user.remarks || '-'}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+            
+            membersTableElement.innerHTML = tableHTML;
+        }
+        
+        // Logout function
+        function logout() {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'index.html';
+        }
+        
+        // Export to CSV and download
+        function downloadCSV() {
+            const users = getUserData();
+            
+            // Create CSV content
+            const header = "id,email,password,registrationTime,remarks";
+            const rows = users.map(user => {
+                return `${user.id},${user.email},${user.password},${user.registrationTime},${user.remarks}`;
+            });
+            
+            const csvContent = [header, ...rows].join('\n');
+            
+            // Create a Blob and download link
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'members.csv');
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+        
+        // Initialize the page
+        window.onload = function() {
+            const currentUser = checkLogin();
+            if (currentUser) {
+                displayUserInfo(currentUser);
+                displayMembers();
+            }
+        };
+    </script>
+</body>
+</html>
