@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Page with localStorage</title>
+</head>
+<body>
+    <h1>Reading Data from localStorage</h1>
+    <p id="output"></p>
+
+    <script>
+        // Example: Retrieve data from localStorage
+        const key = "myKey"; // Replace with your key
+        const storedData = localStorage.getItem(key);
+
+        // Display the data on the page
+        if (storedData) {
+            document.getElementById("output").textContent = `Data from localStorage: ${storedData}`;
+        } else {
+            document.getElementById("output").textContent = "No data found in localStorage for this key.";
+        }
+    </script>
+</body>
+</html>
