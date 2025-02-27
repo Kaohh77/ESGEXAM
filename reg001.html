@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Registration</title>
+    <!-- EmailJS SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        // Initialize EmailJS with your Public Key
+        (function() {
+            // Replace with your actual EmailJS public key
+            emailjs.init("cvRG573vnYfYNJrDN");
+        })();
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="email"],
+        input[type="password"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .btn:hover {
+            background-color: #2980b9;
+        }
+        .error {
+            color: red;
+            margin-top: 15px;
+        }
+        .success {
+            color: green;
+            margin-top: 15px;
+        }
+        .verification-container {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+        .links {
+            margin-top: 20px;
+            text-align: center;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .loader {
+            display: none;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>New Member Registration</h1>
+        
+        <div id="registration-form">
+            <div class="form-group">
+                <label for="reg-email">Email Address (Gmail only)</label>
+                <input type="email" id="reg-email" placeholder="Enter your Gmail address" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-password">Password</label>
+                <input type="password" id="reg-password" placeholder="Create a password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-confirm-password">Confirm Password</label>
+                <input type="password" id="reg-confirm-password" placeholder="Confirm your password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-remarks">Remarks (Optional)</label>
+                <textarea id="reg-remarks" rows="3" placeholder="Add any additional information"></textarea>
+            </div>
+            
+            <button class="btn" id="register-btn" onclick="register()">Register</button>
+            <div id="loader" class="loader"></div>
+            
+            <div id="registration-message"></div>
+            
+            <div id="verification-container" class="verification-container">
+                <h3>Email Verification</h3>
+                <p>A verification code has been sent to your email. Please enter it below:</p>
+                <div class="form-group">
+                    <input type="text" id="verification-code" placeholder="Enter verification code">
+                </div>
+                <button class="btn" onclick="verifyEmail()">Verify Email</button>
+                <p>Didn't receive the code? <a href="#" onclick="resendCode()">Resend</a></p>
+            </div>
+            
+            <div class="links">
+                <p>Already have an account? <a href="index.html">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load user data from localStorage (simulating CSV data)
+        function getUserData() {
+            const userData = localStorage.getItem('userDatabase');
+            return userData ? JSON.parse(userData) : [];
+        }
+        
+        // Save user data to localStorage
+        function saveUserData(users) {
+            localStorage.setItem('userDatabase', JSON.stringify(users));
+        }
+        
+        // Get the next user ID
+        function getNextUserId() {
+            const users = getUserData();
+            return users.length > 0 ? Math.max(...users.map(u => parseInt(u.id))) + 1 : 1;
+        }
+        
+        // Generate a random verification code
+        function generateVerificationCode() {
+            return Math.floor(100000 + Math.random() * 900000).toString();
+        }
+        
+        // Store the verification code and email for later use
+        let pendingRegistration = {
+            verificationCode: null,
+            email: null,
+            password: null,
+            remarks: null
+        };
+        
+        // Function to send email with verification code
+        function sendVerificationEmail(email, verificationCode) {
+            // Show loader
+            document.getElementById('loader').style.display = 'block';
+            document.getElementById('register-btn').disabled = true;
+            
+            // Prepare template parameters
+            const templateParams = {
+                to_email: email,
+                verification_code: verificationCode,
+                to_name: email.split('@')[0]  // Use part before @ as name
+            };
+            
+            // Send email using EmailJS
+            // Replace with your actual service ID and template ID
+            return emailjs.send('4tpu2l2', 't7rani9', templateParams)
+                .then(function(response) {
+                    console.log('Email sent successfully:', response);
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('register-btn').disabled = false;
+                    return true;
+                })
+                .catch(function(error) {
+                    console.error('Email sending failed:', error);
+                    document.getElementById('loader').style.display = 'none';
+                    document.getElementById('register-btn').disabled = false;
+                    return false;
+                });
+        }
+        
+        // Register function
+        async function register() {
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            const remarks = document.getElementById('reg-remarks').value;
+            const messageElement = document.getElementById('registration-message');
+            
+            // Basic validation
+            if (!email || !password || !confirmPassword) {
+                messageElement.innerHTML = '<p class="error">Please fill all required fields</p>';
+                return;
+            }
+            
+            // Check if email is a Gmail account
+            if (!email.toLowerCase().endsWith('@gmail.com')) {
+                messageElement.innerHTML = '<p class="error">Only Gmail accounts are allowed for registration</p>';
+                return;
+            }
+            
+            // Check if passwords match
+            if (password !== confirmPassword) {
+                messageElement.innerHTML = '<p class="error">Passwords do not match</p>';
+                return;
+            }
+            
+            // Check if email already exists
+            const users = getUserData();
+            if (users.some(u => u.email === email)) {
+                messageElement.innerHTML = '<p class="error">This email is already registered</p>';
+                return;
+            }
+            
+            // Generate verification code
+            const verificationCode = generateVerificationCode();
+            pendingRegistration = {
+                verificationCode: verificationCode,
+                email: email,
+                password: password,
+                remarks: remarks
+            };
+            
+            // Send verification email
+            messageElement.innerHTML = '<p>Sending verification email...</p>';
+            
+            try {
+                const emailSent = await sendVerificationEmail(email, verificationCode);
+                
+                if (emailSent) {
+                    messageElement.innerHTML = '<p class="success">Verification code sent to your email.</p>';
+                    // Show verification container
+                    document.getElementById('verification-container').style.display = 'block';
+                } else {
+                    messageElement.innerHTML = `
+                        <p class="error">
+                            Failed to send verification email. Please try again or use this code: 
+                            <strong>${verificationCode}</strong>
+                        </p>
+                    `;
+                    // Show verification container anyway so they can enter the code
+                    document.getElementById('verification-container').style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error in registration process:', error);
+                messageElement.innerHTML = `
+                    <p class="error">
+                        An error occurred during registration. For demo purposes, use this code: 
+                        <strong>${verificationCode}</strong>
+                    </p>
+                `;
+                // Show verification container anyway
+                document.getElementById('verification-container').style.display = 'block';
+            }
+        }
+        
+        // Resend verification code
+        async function resendCode() {
+            const messageElement = document.getElementById('registration-message');
+            
+            if (!pendingRegistration.email || !pendingRegistration.verificationCode) {
+                messageElement.innerHTML = '<p class="error">No pending registration found</p>';
+                return;
+            }
+            
+            messageElement.innerHTML = '<p>Resending verification code...</p>';
+            
+            try {
+                const emailSent = await sendVerificationEmail(
+                    pendingRegistration.email, 
+                    pendingRegistration.verificationCode
+                );
+                
+                if (emailSent) {
+                    messageElement.innerHTML = '<p class="success">Verification code resent to your email.</p>';
+                } else {
+                    messageElement.innerHTML = `
+                        <p class="error">
+                            Failed to resend verification email. For demo purposes, use this code: 
+                            <strong>${pendingRegistration.verificationCode}</strong>
+                        </p>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error resending code:', error);
+                messageElement.innerHTML = `
+                    <p class="error">
+                        An error occurred. For demo purposes, use this code: 
+                        <strong>${pendingRegistration.verificationCode}</strong>
+                    </p>
+                `;
+            }
+        }
+        
+        // Verify email function
+        function verifyEmail() {
+            const verificationCode = document.getElementById('verification-code').value;
+            const messageElement = document.getElementById('registration-message');
+            
+            if (!verificationCode) {
+                messageElement.innerHTML = '<p class="error">Please enter the verification code</p>';
+                return;
+            }
+            
+            if (verificationCode === pendingRegistration.verificationCode) {
+                // Create new user
+                const newUser = {
+                    id: getNextUserId(),
+                    email: pendingRegistration.email,
+                    password: pendingRegistration.password,
+                    registrationTime: new Date().toISOString(),
+                    remarks: pendingRegistration.remarks || ""
+                };
+                
+                // Add to database
+                const users = getUserData();
+                users.push(newUser);
+                saveUserData(users);
+                
+                // Export to CSV (in a real scenario)
+                const csvContent = exportToCSV(users);
+                console.log("CSV Data:", csvContent);
+                
+                // Success message and redirect
+                messageElement.innerHTML = '<p class="success">Registration successful! Redirecting to login page...</p>';
+                document.getElementById('verification-container').style.display = 'none';
+                
+                // Reset pending registration
+                pendingRegistration = {
+                    verificationCode: null,
+                    email: null,
+                    password: null,
+                    remarks: null
+                };
+                
+                // Redirect to login
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 2000);
+            } else {
+                messageElement.innerHTML = '<p class="error">Invalid verification code</p>';
+            }
+        }
+        
+        // Export users to CSV format
+        function exportToCSV(users) {
+            const header = "id,email,password,registrationTime,remarks";
+            const rows = users.map(user => {
+                return `${user.id},${user.email},${user.password},${user.registrationTime},${user.remarks}`;
+            });
+            
+            return [header, ...rows].join('\n');
+        }
+    </script>
+</body>
+</html>
